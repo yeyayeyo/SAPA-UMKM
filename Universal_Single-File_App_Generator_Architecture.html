@@ -1,0 +1,2693 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="artifact-type" content="dashboard">
+  <meta name="design-style" content="vitals">
+  <title>SAPA UMKM — Ruang Layanan Terpadu Usaha</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Figtree:wght@300..900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/lucide@1.43.0/dist/umd/lucide.min.js"></script>
+  <style>
+    :root {
+      color-scheme: light;
+
+      /* Page and surfaces (Vitals) */
+      --background: #ffffff;
+      --surface-container-low: #f1f7f8;
+      --surface-container: #e3f1f3;
+      --surface-container-high: #d5e9ec;
+
+      /* Text */
+      --on-surface: #1b2b33;
+      --on-surface-variant: #46585f;
+
+      /* Rules */
+      --outline: #7b9198;
+      --outline-variant: #d5e3e5;
+
+      /* Accents */
+      --primary: #0f7c8a;
+      --on-primary: #ffffff;
+      --primary-container: #e3f1f3;
+      --on-primary-container: #0a5560;
+      --secondary: #1d5e3a;
+      --tertiary: #2e7d4f;
+      --error: #b3261e;
+      --on-error: #ffffff;
+
+      /* Data series */
+      --data-1: #0f7c8a;
+      --data-2: #2e7d4f;
+      --data-3: #b86e00;
+      --data-4: #5c5fb0;
+      --data-context: #b8c7ca;
+
+      /* Semantic */
+      --positive: #2e7d4f;
+      --warning: #b86e00;
+      --focus: #0f7c8a;
+
+      /* Tinted soft backgrounds */
+      --positive-bg: color-mix(in srgb, var(--tertiary) 13%, var(--background));
+      --warning-bg: color-mix(in srgb, var(--warning) 13%, var(--background));
+      --error-bg: color-mix(in srgb, var(--error) 10%, var(--background));
+      --primary-hover: color-mix(in srgb, var(--primary) 85%, var(--on-surface));
+
+      /* Fonts */
+      --font-headline: 'Figtree', sans-serif;
+      --font-body: 'Atkinson Hyperlegible', sans-serif;
+      --font-label: 'Figtree', sans-serif;
+
+      /* Type scale (Dashboard) */
+      --display-size: clamp(1.75rem, 1.4rem + 1.2vw, 2.25rem);
+      --headline-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.5rem);
+      --subhead-size: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
+      --body-size: clamp(0.9375rem, 0.9rem + 0.15vw, 1rem);
+      --label-size: 0.75rem;
+
+      /* Shape */
+      --rounded: 0.625rem;
+      --rounded-lg: 0.875rem;
+      --rounded-full: 9999px;
+
+      /* Spacing scale (4pt base) */
+      --space-xs: 0.25rem;
+      --space-sm: 0.5rem;
+      --space-md: 1rem;
+      --space-lg: 1.5rem;
+      --space-xl: 2.5rem;
+      --space-2xl: 4rem;
+      --space-3xl: 6rem;
+
+      /* Style effects */
+      --top-bar: 6px solid var(--primary);
+      --status-bar-width: 4px;
+      --card-border: 1px solid var(--outline-variant);
+      --card-lift: 0 1px 2px rgb(27 43 51 / 0.05), 0 6px 16px rgb(27 43 51 / 0.05);
+
+      /* Motion */
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+      --dur-micro: 120ms;
+      --dur-short: 220ms;
+      --dur-long: 420ms;
+    }
+
+    /* Base reset */
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+      overflow-x: clip;
+      margin: 0;
+      padding: 0;
+      background-color: var(--surface-container-low);
+      color: var(--on-surface);
+      font-family: var(--font-body);
+      font-size: var(--body-size);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    header { position: static !important; }
+
+    button, input, select, textarea {
+      font-family: inherit;
+      font-size: inherit;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: 2px;
+    }
+
+    .page-shell {
+      border-top: var(--top-bar);
+      min-height: 100vh;
+    }
+
+    .page-grid {
+      display: grid;
+      gap: var(--space-lg);
+      padding: var(--space-lg);
+      max-width: 1240px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    .page-grid * { min-width: 0; }
+
+    /* Header */
+    .portal-header {
+      background: var(--background);
+      border: var(--card-border);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-lg) var(--space-xl);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: var(--space-lg);
+    }
+
+    .header-copy {
+      max-width: 65ch;
+    }
+
+    .kicker {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin: 0 0 var(--space-xs) 0;
+    }
+
+    h1, h2, h3 {
+      font-family: var(--font-headline);
+      color: var(--on-surface);
+      margin: 0;
+    }
+
+    .title {
+      font-size: var(--display-size);
+      font-weight: 800;
+      letter-spacing: -0.015em;
+      line-height: 1.08;
+    }
+
+    .lede {
+      font-size: 1.0625rem;
+      line-height: 1.6;
+      color: var(--on-surface-variant);
+      max-width: 60ch;
+      margin: var(--space-sm) 0 0 0;
+    }
+
+    .header-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+      align-items: center;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+      min-height: 44px;
+      padding: 0 var(--space-md);
+      border-radius: var(--rounded);
+      font-family: var(--font-headline);
+      font-weight: 600;
+      font-size: var(--body-size);
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: background-color var(--dur-micro) var(--ease-out), color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: var(--on-primary);
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background-color: var(--background);
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+    .btn-secondary:hover {
+      background-color: var(--surface-container-low);
+    }
+
+    .btn-danger-outline {
+      background-color: var(--background);
+      color: var(--error);
+      border-color: var(--outline-variant);
+    }
+    .btn-danger-outline:hover {
+      background-color: var(--error-bg);
+      border-color: var(--error);
+    }
+
+    .btn-sm {
+      min-height: 36px;
+      padding: 0 var(--space-sm);
+      font-size: 0.875rem;
+    }
+
+    .btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    /* Status chips (Treatment 4) */
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+      font-family: var(--font-label);
+      font-weight: 600;
+      font-size: var(--label-size);
+      padding: var(--space-xs) var(--space-md);
+      border-radius: var(--rounded-full);
+      background: var(--positive-bg);
+      color: var(--secondary);
+      line-height: 1.3;
+    }
+    .chip[data-status="info"] {
+      background: var(--primary-container);
+      color: var(--on-primary-container);
+    }
+    .chip[data-status="warn"] {
+      background: var(--warning-bg);
+      color: var(--on-surface);
+    }
+    .chip[data-status="alert"] {
+      background: var(--error-bg);
+      color: var(--error);
+    }
+    .chip[data-status="neutral"] {
+      background: var(--surface-container-low);
+      color: var(--on-surface-variant);
+      border: var(--card-border);
+    }
+
+    /* Filter / Module Focus Bar */
+    .module-nav {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-md);
+      background: var(--background);
+      border: var(--card-border);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-sm) var(--space-md);
+    }
+
+    .filter-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+    }
+
+    .nav-pill {
+      min-height: 44px;
+      padding: 0 var(--space-md);
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      font-family: var(--font-headline);
+      font-weight: 600;
+      font-size: var(--body-size);
+      color: var(--on-surface-variant);
+      cursor: pointer;
+      transition: color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out), background-color var(--dur-micro) var(--ease-out);
+    }
+    .nav-pill:hover {
+      color: var(--on-surface);
+      background-color: var(--surface-container-low);
+    }
+    .nav-pill[aria-pressed="true"] {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    .save-status {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      color: var(--on-surface-variant);
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+    }
+
+    /* KPI Row (Treatment 1: Status accent bar) */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+      gap: var(--space-md);
+    }
+
+    .status-card {
+      background: var(--background);
+      border: var(--card-border);
+      border-left: var(--status-bar-width) solid var(--primary);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-md) var(--space-lg);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: var(--space-xs);
+    }
+    .status-card[data-status="ok"] { border-left-color: var(--tertiary); }
+    .status-card[data-status="alert"] { border-left-color: var(--error); }
+
+    .kpi-label {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--on-surface-variant);
+    }
+
+    .kpi-value {
+      font-family: var(--font-headline);
+      font-size: clamp(1.5rem, 1.2rem + 0.8vw, 1.875rem);
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.15;
+      color: var(--on-surface);
+    }
+
+    .kpi-note {
+      font-size: 0.875rem;
+      color: var(--on-surface-variant);
+    }
+    .kpi-note[data-tone="ok"] { color: var(--secondary); font-weight: 700; }
+    .kpi-note[data-tone="alert"] { color: var(--error); font-weight: 700; }
+
+    /* Main Workspace Panels */
+    .workspace-section {
+      background: var(--background);
+      border: var(--card-border);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-lg);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-lg);
+    }
+
+    .workspace-section.is-hidden {
+      display: none;
+    }
+
+    .section-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: var(--space-md);
+      padding-bottom: var(--space-md);
+      border-bottom: 1px solid var(--outline-variant);
+    }
+
+    .section-title {
+      font-size: var(--headline-size);
+      font-weight: 800;
+      letter-spacing: -0.015em;
+      line-height: 1.15;
+    }
+
+    .section-desc {
+      margin: var(--space-xs) 0 0 0;
+      color: var(--on-surface-variant);
+      max-width: 65ch;
+    }
+
+    /* Two-column asymmetric splits */
+    .split-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.95fr);
+      gap: var(--space-lg);
+      align-items: start;
+    }
+
+    .split-layout-equal {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+      gap: var(--space-lg);
+      align-items: start;
+    }
+
+    .card-wrapper {
+      container-type: inline-size;
+    }
+
+    /* Forms & Inputs */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
+      gap: var(--space-md);
+      align-items: end;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+
+    .field label {
+      font-family: var(--font-label);
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--on-surface);
+    }
+
+    .field input[type="text"],
+    .field input[type="number"],
+    .field input[type="date"],
+    .field select,
+    .field textarea {
+      width: 100%;
+      min-height: 44px;
+      padding: var(--space-sm) var(--space-md);
+      background: var(--background);
+      border: 1px solid var(--outline);
+      border-radius: var(--rounded);
+      color: var(--on-surface);
+      transition: border-color var(--dur-micro) var(--ease-out), box-shadow var(--dur-micro) var(--ease-out);
+    }
+
+    .field select {
+      padding-right: var(--space-xl);
+    }
+
+    .field textarea {
+      min-height: 84px;
+      resize: vertical;
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px var(--primary-container);
+    }
+
+    .inline-message {
+      font-size: 0.9375rem;
+      padding: var(--space-sm) var(--space-md);
+      border-radius: var(--rounded);
+      background: var(--primary-container);
+      color: var(--on-primary-container);
+      border-left: var(--status-bar-width) solid var(--primary);
+      display: none;
+    }
+    .inline-message.is-visible { display: block; }
+    .inline-message[data-tone="ok"] {
+      background: var(--positive-bg);
+      color: var(--secondary);
+      border-left-color: var(--tertiary);
+    }
+    .inline-message[data-tone="alert"] {
+      background: var(--error-bg);
+      color: var(--error);
+      border-left-color: var(--error);
+    }
+
+    /* Checklist items */
+    .checklist {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+
+    .check-row {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-md);
+      padding: var(--space-sm) var(--space-md);
+      border: var(--card-border);
+      border-radius: var(--rounded);
+      background: var(--background);
+      cursor: pointer;
+      transition: background-color var(--dur-micro) var(--ease-out);
+    }
+    .check-row:hover {
+      background: var(--surface-container-low);
+    }
+    .check-row input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      margin-top: 2px;
+      accent-color: var(--primary);
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+
+    .check-title {
+      font-family: var(--font-headline);
+      font-weight: 700;
+      color: var(--on-surface);
+      display: block;
+    }
+    .check-sub {
+      font-size: 0.875rem;
+      color: var(--on-surface-variant);
+      display: block;
+    }
+
+    /* Progress bar */
+    .progress-track {
+      width: 100%;
+      height: 10px;
+      background: var(--surface-container);
+      border-radius: var(--rounded-full);
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--tertiary);
+      border-radius: var(--rounded-full);
+      transition: width var(--dur-short) var(--ease-out);
+    }
+
+    /* Kartu Usaha Card */
+    .kartu-usaha-panel {
+      background: var(--surface-container-low);
+      border: var(--card-border);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-lg);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+
+    .kartu-card {
+      background: var(--background);
+      border: var(--card-border);
+      border-top: var(--top-bar);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-lg);
+      box-shadow: var(--card-lift);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+
+    .kartu-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: var(--space-md);
+    }
+
+    .kartu-id {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--on-surface-variant);
+      text-transform: uppercase;
+    }
+
+    .kartu-name {
+      font-family: var(--font-headline);
+      font-size: var(--headline-size);
+      font-weight: 800;
+      margin-top: var(--space-xs);
+    }
+
+    .kartu-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-md);
+      padding-top: var(--space-sm);
+      border-top: 1px solid var(--outline-variant);
+    }
+
+    .meta-item-label {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      color: var(--on-surface-variant);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: block;
+    }
+    .meta-item-val {
+      font-family: var(--font-headline);
+      font-weight: 700;
+      color: var(--on-surface);
+      display: block;
+    }
+
+    .kartu-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-md);
+      padding-top: var(--space-sm);
+      border-top: 1px solid var(--outline-variant);
+    }
+
+    /* Tables */
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      border: var(--card-border);
+      border-radius: var(--rounded-lg);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--background);
+      font-size: 0.9375rem;
+    }
+
+    th {
+      background: var(--surface-container-low);
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--on-surface-variant);
+      text-align: left;
+      padding: var(--space-sm) var(--space-md);
+      border-bottom: 1px solid var(--outline-variant);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: var(--space-sm) var(--space-md);
+      border-bottom: 1px solid var(--outline-variant);
+      vertical-align: middle;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .num-col {
+      text-align: right;
+      font-family: var(--font-headline);
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .empty-state {
+      padding: var(--space-xl) var(--space-lg);
+      text-align: left;
+      background: var(--surface-container-low);
+      border-radius: var(--rounded-lg);
+      border: 1px dashed var(--outline);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+      align-items: flex-start;
+    }
+
+    .empty-state h3 {
+      font-size: var(--subhead-size);
+      font-weight: 700;
+    }
+
+    .empty-state p {
+      margin: 0;
+      color: var(--on-surface-variant);
+      max-width: 55ch;
+    }
+
+    /* Chart Container */
+    .chart-box {
+      background: var(--background);
+      border: var(--card-border);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+    .chart-canvas-wrap {
+      position: relative;
+      min-height: 280px;
+      width: 100%;
+    }
+
+    /* Dompet Digital Card */
+    .wallet-hero {
+      background: var(--surface-container-low);
+      border: var(--card-border);
+      border-left: var(--status-bar-width) solid var(--primary);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-lg);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+
+    .ledger-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+
+    .ledger-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-md);
+      padding: var(--space-sm) var(--space-md);
+      border-bottom: 1px solid var(--outline-variant);
+    }
+    .ledger-item:last-child { border-bottom: none; }
+
+    /* Sertifikasi Cards */
+    .cert-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+      gap: var(--space-md);
+    }
+
+    .cert-card {
+      background: var(--background);
+      border: var(--card-border);
+      border-top: var(--status-bar-width) solid var(--primary);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+    .cert-card[data-complete="true"] {
+      border-top-color: var(--tertiary);
+    }
+
+    /* Slider + Number sync */
+    .slider-pair {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 150px;
+      gap: var(--space-md);
+      align-items: center;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    /* Target band visual meter */
+    .range-meter {
+      position: relative;
+      height: 28px;
+      background: var(--surface-container-low);
+      border: var(--card-border);
+      border-radius: var(--rounded);
+      overflow: hidden;
+    }
+    .range-meter-safe {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 35%;
+      background: var(--positive-bg);
+      border-right: 2px dashed var(--tertiary);
+    }
+    .range-meter-fill {
+      position: relative;
+      height: 100%;
+      background: var(--primary);
+      opacity: 0.85;
+      transition: width var(--dur-short) var(--ease-out);
+    }
+
+    /* UMKM Connect Feed */
+    .community-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+
+    .post-card {
+      border: var(--card-border);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-md) var(--space-lg);
+      background: var(--background);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+
+    .post-meta {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-sm);
+      font-size: 0.875rem;
+      color: var(--on-surface-variant);
+    }
+
+    .post-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+      padding-top: var(--space-xs);
+    }
+
+    .reply-box {
+      margin-top: var(--space-xs);
+      padding-left: var(--space-md);
+      border-left: 2px solid var(--outline-variant);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+
+    /* Ecosystem & Quote Callout */
+    .callout-band {
+      background: var(--primary-container);
+      border-left: var(--status-bar-width) solid var(--primary);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-lg);
+      color: var(--on-primary-container);
+    }
+
+    .callout-quote {
+      font-size: 1.125rem;
+      font-weight: 700;
+      margin: 0 0 var(--space-xs) 0;
+      line-height: 1.5;
+    }
+
+    .ecosystem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+      gap: var(--space-md);
+    }
+
+    .eco-tile {
+      background: var(--surface-container-low);
+      border: var(--card-border);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+
+    .benefits-list {
+      margin: 0;
+      padding-left: var(--space-lg);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+      gap: var(--space-sm) var(--space-xl);
+    }
+
+    .portal-footer {
+      padding: var(--space-md) 0 var(--space-xl);
+      color: var(--on-surface-variant);
+      font-size: 0.875rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: var(--space-md);
+      border-top: 1px solid var(--outline-variant);
+    }
+
+    @container (max-width: 480px) {
+      .kartu-meta-grid { grid-template-columns: 1fr; }
+      .slider-pair { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 860px) {
+      .split-layout { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 640px) {
+      .page-grid { padding: var(--space-md); gap: var(--space-md); }
+      .portal-header { padding: var(--space-md); }
+      .workspace-section { padding: var(--space-md); }
+      .slider-pair { grid-template-columns: 1fr; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <main class="page-grid">
+
+      <!-- Header -->
+      <header class="portal-header">
+        <div class="header-copy">
+          <p class="kicker">SAPA UMKM — Tumbuh Bersama, Nyalakan Indonesia</p>
+          <h1 class="title">Ruang Kerja Layanan Terpadu UMKM</h1>
+          <p class="lede">Satu akun untuk mengelola verifikasi usaha, Kartu Usaha, pembukuan kas digital, dompet digital, sertifikasi produk, simulasi pembiayaan, dan jejaring kolaborasi komunitas.</p>
+        </div>
+        <div class="header-actions">
+          <button type="button" class="btn btn-primary" id="btn-load-preset" onclick="loadSimulationPreset()">
+            <i data-lucide="sparkles" width="18" height="18" aria-hidden="true"></i>
+            Muat Simulasi Usaha
+          </button>
+          <button type="button" class="btn btn-secondary" onclick="exportBookkeepingCSV()">
+            <i data-lucide="download" width="18" height="18" aria-hidden="true"></i>
+            Ekspor Kas CSV
+          </button>
+          <button type="button" class="btn btn-danger-outline" id="btn-reset-all" onclick="resetWorkspaceState(this)">
+            Reset Data
+          </button>
+        </div>
+      </header>
+
+      <!-- Module Focus Bar -->
+      <nav class="module-nav" aria-label="Filter modul layanan">
+        <div class="filter-pills">
+          <button type="button" class="nav-pill" aria-pressed="true" onclick="filterModules('all', this)">Semua Layanan</button>
+          <button type="button" class="nav-pill" aria-pressed="false" onclick="filterModules('identitas', this)">Verifikasi &amp; Kartu Usaha</button>
+          <button type="button" class="nav-pill" aria-pressed="false" onclick="filterModules('keuangan', this)">Pembukuan &amp; Dompet</button>
+          <button type="button" class="nav-pill" aria-pressed="false" onclick="filterModules('ekspansi', this)">Sertifikasi &amp; Pembiayaan</button>
+          <button type="button" class="nav-pill" aria-pressed="false" onclick="filterModules('komunitas', this)">UMKM Connect &amp; Ekosistem</button>
+        </div>
+        <div class="save-status" id="save-status-indicator" aria-live="polite">
+          <i data-lucide="check-circle-2" width="16" height="16" aria-hidden="true"></i>
+          <span id="save-status-text">Siap digunakan</span>
+        </div>
+      </nav>
+
+      <!-- Top KPI Strip -->
+      <section class="kpi-grid" aria-label="Ringkasan status usaha">
+        <article class="status-card" id="kpi-card-verif" data-status="neutral">
+          <span class="kpi-label">Verifikasi UMKM</span>
+          <div class="kpi-value" id="kpi-verif-val">0 / 4 Langkah</div>
+          <span class="kpi-note" id="kpi-verif-note">Lengkapi identitas untuk mengaktifkan hak ekosistem</span>
+        </article>
+
+        <article class="status-card" id="kpi-card-wallet" data-status="neutral">
+          <span class="kpi-label">Saldo Dompet Digital</span>
+          <div class="kpi-value" id="kpi-wallet-val">Rp 0</div>
+          <span class="kpi-note" id="kpi-wallet-note">Siap menerima pembayaran QRIS &amp; mutasi usaha</span>
+        </article>
+
+        <article class="status-card" id="kpi-card-cashflow" data-status="neutral">
+          <span class="kpi-label">Arus Kas Bersih</span>
+          <div class="kpi-value" id="kpi-cashflow-val">Rp 0</div>
+          <span class="kpi-note" id="kpi-cashflow-note">Belum ada catatan pemasukan atau pengeluaran</span>
+        </article>
+
+        <article class="status-card" id="kpi-card-cert" data-status="neutral">
+          <span class="kpi-label">Sertifikasi &amp; Kelayakan</span>
+          <div class="kpi-value" id="kpi-cert-val">0 / 3 Siap</div>
+          <span class="kpi-note" id="kpi-cert-note">Skor kesiapan pembiayaan: 0%</span>
+        </article>
+      </section>
+
+      <!-- SECTION 1: VERIFIKASI UMKM & KARTU USAHA -->
+      <section class="workspace-section" data-module-group="identitas" id="sec-verifikasi">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Verifikasi UMKM &amp; Kartu Usaha</h2>
+            <p class="section-desc">Verifikasi menjaga hak dan kewajiban UMKM dalam ekosistem usaha Indonesia serta mengaktifkan Kartu Usaha untuk program peningkatan kapasitas.</p>
+          </div>
+          <span class="chip" id="badge-verif-status" data-status="neutral">Belum Terverifikasi</span>
+        </div>
+
+        <div class="split-layout">
+          <!-- Profil & Checklist Verifikasi -->
+          <div class="card-wrapper" style="display: flex; flex-direction: column; gap: var(--space-lg);">
+            <form onsubmit="saveBusinessProfile(event)" style="display: flex; flex-direction: column; gap: var(--space-md);">
+              <div class="form-grid">
+                <div class="field">
+                  <label for="biz-name">Nama Usaha</label>
+                  <input type="text" id="biz-name" placeholder="Contoh: Kedai Kopi Nusantara" required>
+                </div>
+                <div class="field">
+                  <label for="biz-owner">Nama Pemilik</label>
+                  <input type="text" id="biz-owner" placeholder="Nama lengkap sesuai KTP" required>
+                </div>
+              </div>
+
+              <div class="form-grid">
+                <div class="field">
+                  <label for="biz-sector">Sektor Usaha</label>
+                  <select id="biz-sector">
+                    <option value="Kuliner &amp; Olahan Pangan">Kuliner &amp; Olahan Pangan</option>
+                    <option value="Kriya &amp; Kerajinan">Kriya &amp; Kerajinan</option>
+                    <option value="Fesyen &amp; Tekstil">Fesyen &amp; Tekstil</option>
+                    <option value="Perdagangan &amp; Ritel">Perdagangan &amp; Ritel</option>
+                    <option value="Pertanian &amp; Agribisnis">Pertanian &amp; Agribisnis</option>
+                    <option value="Jasa &amp; Digital">Jasa &amp; Digital</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="biz-scale">Skala Usaha</label>
+                  <select id="biz-scale">
+                    <option value="Usaha Mikro">Usaha Mikro</option>
+                    <option value="Usaha Kecil">Usaha Kecil</option>
+                    <option value="Usaha Menengah">Usaha Menengah</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-grid">
+                <div class="field">
+                  <label for="biz-nib">Nomor NIB / Legalitas</label>
+                  <input type="text" id="biz-nib" placeholder="13 digit NIB OSS (opsional awal)">
+                </div>
+                <div class="field">
+                  <label for="biz-city">Kota / Kabupaten</label>
+                  <input type="text" id="biz-city" placeholder="Contoh: Bandung, Jawa Barat">
+                </div>
+                <button type="submit" class="btn btn-primary">Simpan Profil</button>
+              </div>
+              <div class="inline-message" id="msg-profile" role="status"></div>
+            </form>
+
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-sm);">
+                <strong style="font-family: var(--font-headline);">Daftar Periksa Verifikasi Ekosistem</strong>
+                <span class="kpi-label" id="verif-progress-pct">0%</span>
+              </div>
+              <div class="progress-track" style="margin-bottom: var(--space-md);">
+                <div class="progress-fill" id="verif-progress-bar" style="width: 0%;"></div>
+              </div>
+              <div class="checklist" id="verif-checklist"></div>
+            </div>
+          </div>
+
+          <!-- Kartu Usaha & Peningkatan Kapasitas -->
+          <div class="card-wrapper kartu-usaha-panel">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: var(--space-sm);">
+              <strong style="font-family: var(--font-headline); font-size: var(--subhead-size);">Kartu Usaha Nasional</strong>
+              <span class="chip" id="kartu-status-chip" data-status="neutral">Menunggu Verifikasi</span>
+            </div>
+
+            <div class="kartu-card">
+              <div class="kartu-top">
+                <div>
+                  <span class="kartu-id" id="kartu-id-display">ID: KUS-2026-0000</span>
+                  <div class="kartu-name" id="kartu-name-display">Nama Usaha Belum Diisi</div>
+                  <div style="color: var(--on-surface-variant); font-size: 0.9375rem;" id="kartu-owner-display">Pemilik: —</div>
+                </div>
+                <svg width="56" height="56" viewBox="0 0 56 56" aria-hidden="true" id="kartu-qr-svg" style="flex-shrink: 0; border: 1px solid var(--outline-variant); border-radius: var(--rounded);">
+                  <rect x="4" y="4" width="16" height="16" fill="currentColor" opacity="0.85"></rect>
+                  <rect x="8" y="8" width="8" height="8" fill="var(--background)"></rect>
+                  <rect x="36" y="4" width="16" height="16" fill="currentColor" opacity="0.85"></rect>
+                  <rect x="40" y="8" width="8" height="8" fill="var(--background)"></rect>
+                  <rect x="4" y="36" width="16" height="16" fill="currentColor" opacity="0.85"></rect>
+                  <rect x="8" y="40" width="8" height="8" fill="var(--background)"></rect>
+                  <rect x="24" y="24" width="8" height="8" fill="var(--primary)"></rect>
+                  <rect x="36" y="26" width="6" height="6" fill="currentColor" opacity="0.65"></rect>
+                  <rect x="26" y="38" width="10" height="10" fill="currentColor" opacity="0.65"></rect>
+                  <rect x="42" y="40" width="10" height="10" fill="var(--tertiary)"></rect>
+                </svg>
+              </div>
+
+              <div class="kartu-meta-grid">
+                <div>
+                  <span class="meta-item-label">Sektor &amp; Skala</span>
+                  <span class="meta-item-val" id="kartu-sector-display">—</span>
+                </div>
+                <div>
+                  <span class="meta-item-label">Wilayah &amp; NIB</span>
+                  <span class="meta-item-val" id="kartu-city-display">—</span>
+                </div>
+              </div>
+
+              <div class="kartu-footer">
+                <span style="font-size: 0.875rem; color: var(--on-surface-variant);">Kapasitas Terlatih: <strong id="kartu-cap-count">0 / 3 Modul</strong></span>
+                <span class="chip" id="kartu-tier-chip" data-status="info">Tingkat Rintisan</span>
+              </div>
+            </div>
+
+            <div>
+              <strong style="font-family: var(--font-headline); display: block; margin-bottom: var(--space-xs);">Peningkatan Kapasitas &amp; Pendampingan</strong>
+              <p style="margin: 0 0 var(--space-sm) 0; font-size: 0.875rem; color: var(--on-surface-variant);">Selesaikan modul pelatihan Kartu Usaha untuk menaikkan tingkat kemandirian usaha:</p>
+              <div class="checklist" id="capacity-checklist"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 2: PEMBUKUAN DIGITAL & DOMPET DIGITAL -->
+      <section class="workspace-section" data-module-group="keuangan" id="sec-keuangan">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Pembukuan Digital &amp; Dompet Digital</h2>
+            <p class="section-desc">Catat pemasukan dan pengeluaran usaha secara teratur serta kelola saldo pembayaran digital dalam satu alur kas terpadu.</p>
+          </div>
+          <div style="display: flex; gap: var(--space-sm); flex-wrap: wrap;">
+            <span class="chip" id="badge-cash-health" data-status="neutral">Menunggu Transaksi</span>
+          </div>
+        </div>
+
+        <div class="split-layout">
+          <!-- Pembukuan Digital -->
+          <div style="display: flex; flex-direction: column; gap: var(--space-md);">
+            <form onsubmit="addBookkeepingEntry(event)" class="form-grid" style="background: var(--surface-container-low); padding: var(--space-md); border-radius: var(--rounded-lg); border: var(--card-border);">
+              <div class="field">
+                <label for="tx-type">Jenis Transaksi</label>
+                <select id="tx-type" onchange="syncCategoryOptions()">
+                  <option value="masuk">Pemasukan</option>
+                  <option value="keluar">Pengeluaran</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="tx-category">Kategori</label>
+                <select id="tx-category">
+                  <option value="Penjualan Produk">Penjualan Produk</option>
+                  <option value="Pembayaran Jasa">Pembayaran Jasa</option>
+                  <option value="Modal / Hibah">Modal / Hibah</option>
+                  <option value="Bahan Baku">Bahan Baku</option>
+                  <option value="Operasional &amp; Listrik">Operasional &amp; Listrik</option>
+                  <option value="Kemasan &amp; Promosi">Kemasan &amp; Promosi</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="tx-amount">Nominal (Rp)</label>
+                <input type="number" id="tx-amount" min="100" step="500" placeholder="150000" required>
+              </div>
+              <div class="field">
+                <label for="tx-date">Tanggal</label>
+                <input type="date" id="tx-date" required>
+              </div>
+              <div class="field" style="grid-column: 1 / -1;">
+                <label for="tx-note">Keterangan Singkat</label>
+                <div style="display: flex; gap: var(--space-sm); flex-wrap: wrap;">
+                  <input type="text" id="tx-note" placeholder="Contoh: Penjualan 25 paket kopi kemasan" required style="flex: 1 1 220px;">
+                  <button type="submit" class="btn btn-primary">Catat Transaksi</button>
+                </div>
+              </div>
+            </form>
+            <div class="inline-message" id="msg-tx" role="status"></div>
+
+            <!-- Grafik Arus Kas -->
+            <div class="chart-box">
+              <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: var(--space-sm);">
+                <h3 style="font-size: var(--subhead-size); font-weight: 700;">Perbandingan Pemasukan &amp; Pengeluaran per Kategori</h3>
+                <span style="font-size: 0.8125rem; color: var(--on-surface-variant);">Garis batas hijau menandai target margin sehat usaha (≥ 20%)</span>
+              </div>
+              <div class="chart-canvas-wrap">
+                <canvas id="cashflow-chart" aria-label="Grafik pembukuan digital"></canvas>
+              </div>
+            </div>
+
+            <!-- Filter & Tabel Riwayat -->
+            <div style="display: flex; justify-content: space-between; align-items: end; flex-wrap: wrap; gap: var(--space-md);">
+              <div class="field" style="min-width: 180px;">
+                <label for="tx-filter-type">Saring Catatan Kas</label>
+                <select id="tx-filter-type" onchange="renderBookkeeping()">
+                  <option value="semua">Semua Transaksi</option>
+                  <option value="masuk">Hanya Pemasukan</option>
+                  <option value="keluar">Hanya Pengeluaran</option>
+                </select>
+              </div>
+              <div style="font-size: 0.9375rem; color: var(--on-surface-variant);">
+                Total Masuk: <strong id="sum-in" style="color: var(--secondary);">Rp 0</strong> &middot;
+                Total Keluar: <strong id="sum-out" style="color: var(--error);">Rp 0</strong>
+              </div>
+            </div>
+
+            <div id="tx-table-container"></div>
+          </div>
+
+          <!-- Dompet Digital UMKM -->
+          <div style="display: flex; flex-direction: column; gap: var(--space-md);">
+            <div class="wallet-hero">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span class="kpi-label">Dompet Digital Usaha</span>
+                <span class="chip" data-status="info">QRIS Siap</span>
+              </div>
+              <div class="kpi-value" id="wallet-balance-main">Rp 0</div>
+              <p style="margin: 0; font-size: 0.875rem; color: var(--on-surface-variant);">
+                Terima pembayaran QRIS pelanggan secara langsung dan sinkronkan otomatis ke pembukuan harian usaha.
+              </p>
+            </div>
+
+            <form onsubmit="processWalletAction(event)" style="display: flex; flex-direction: column; gap: var(--space-md); border: var(--card-border); padding: var(--space-md); border-radius: var(--rounded-lg);">
+              <strong style="font-family: var(--font-headline);">Transaksi Dompet Digital</strong>
+              <div class="form-grid">
+                <div class="field">
+                  <label for="wallet-action-type">Jenis Aksi</label>
+                  <select id="wallet-action-type">
+                    <option value="qris">Terima Pembayaran QRIS</option>
+                    <option value="topup">Isi Saldo Modal</option>
+                    <option value="withdraw">Tarik Dana ke Bank</option>
+                    <option value="pay">Bayar Pemasok</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="wallet-amount">Nominal (Rp)</label>
+                  <input type="number" id="wallet-amount" min="1000" step="1000" placeholder="75000" required>
+                </div>
+              </div>
+              <div class="field">
+                <label for="wallet-desc">Keterangan Mutasi</label>
+                <input type="text" id="wallet-desc" placeholder="Contoh: Pembayaran meja 4 / Beli kemasan" required>
+              </div>
+              <label class="check-row" style="padding: var(--space-xs) var(--space-sm);">
+                <input type="checkbox" id="wallet-sync-book" checked>
+                <span class="check-sub" style="color: var(--on-surface);">Catat otomatis ke Pembukuan Digital (untuk QRIS &amp; Bayar Pemasok)</span>
+              </label>
+              <button type="submit" class="btn btn-primary">Proses Mutasi Dompet</button>
+              <div class="inline-message" id="msg-wallet" role="status"></div>
+            </form>
+
+            <div style="border: var(--card-border); border-radius: var(--rounded-lg); padding: var(--space-md);">
+              <strong style="font-family: var(--font-headline); display: block; margin-bottom: var(--space-sm);">Riwayat Mutasi Dompet</strong>
+              <div id="wallet-ledger"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 3: SERTIFIKASI & PEMBIAYAAN UMKM -->
+      <section class="workspace-section" data-module-group="ekspansi" id="sec-sertifikasi">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Sertifikasi / Standarisasi &amp; Pembiayaan UMKM</h2>
+            <p class="section-desc">Pantau kesiapan sertifikasi Halal, Merek, dan Standar Produk untuk memperkuat akses pembiayaan dan permodalan.</p>
+          </div>
+          <span class="chip" id="badge-cert-summary" data-status="info">3 Jalur Standarisasi</span>
+        </div>
+
+        <!-- 3 Jalur Sertifikasi -->
+        <div class="cert-grid" id="cert-cards-container"></div>
+
+        <!-- Kalkulator & Kelayakan Pembiayaan -->
+        <div class="split-layout" style="padding-top: var(--space-md); border-top: 1px solid var(--outline-variant);">
+          <div style="display: flex; flex-direction: column; gap: var(--space-md);">
+            <div>
+              <h3 style="font-size: var(--headline-size); font-weight: 800;">Simulasi &amp; Kesiapan Pembiayaan UMKM</h3>
+              <p style="margin: var(--space-xs) 0 0 0; color: var(--on-surface-variant);">Hitung estimasi angsuran bulanan dan cek kecocokan skema permodalan terhadap kondisi usaha Anda.</p>
+            </div>
+
+            <div class="field">
+              <label for="loan-scheme">Pilih Skema Pembiayaan</label>
+              <select id="loan-scheme" onchange="updateFinancingCalc()">
+                <option value="3">KUR Super Mikro — Suku Bunga 3% / tahun (hingga Rp 10 Juta)</option>
+                <option value="6" selected>KUR Mikro — Suku Bunga 6% / tahun (Rp 10–100 Juta)</option>
+                <option value="7">KUR Kecil — Suku Bunga 7% / tahun (Rp 100–500 Juta)</option>
+                <option value="4">Pembiayaan Ultra Mikro (UMi) — Margin 4% / tahun</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="input-loan-amount">Kebutuhan Modal (Rp)</label>
+              <div class="slider-pair">
+                <input type="range" id="slider-loan-amount" min="5000000" max="250000000" step="5000000" value="35000000" oninput="syncLoanAmountFromSlider(this.value)">
+                <input type="number" id="input-loan-amount" min="1000000" max="500000000" step="1000000" value="35000000" oninput="syncLoanAmountFromNumber(this.value)">
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="input-loan-tenor">Tenor Pengembalian (Bulan)</label>
+              <div class="slider-pair">
+                <input type="range" id="slider-loan-tenor" min="6" max="60" step="6" value="24" oninput="syncLoanTenorFromSlider(this.value)">
+                <input type="number" id="input-loan-tenor" min="3" max="60" step="1" value="24" oninput="syncLoanTenorFromNumber(this.value)">
+              </div>
+            </div>
+
+            <div style="display: flex; flex-wrap: wrap; gap: var(--space-sm);">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="applyLoanPreset(10000000, 12, '3')">Contoh Mikro Rp 10 Jt (12 bln)</button>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="applyLoanPreset(50000000, 24, '6')">Contoh Ekspansi Rp 50 Jt (24 bln)</button>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="applyLoanPreset(150000000, 36, '7')">Contoh Skala Kecil Rp 150 Jt (36 bln)</button>
+            </div>
+          </div>
+
+          <!-- Output Pembiayaan & Skor Kesiapan -->
+          <div style="display: flex; flex-direction: column; gap: var(--space-md);">
+            <div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));">
+              <div class="status-card" data-status="neutral">
+                <span class="kpi-label">Estimasi Angsuran / Bulan</span>
+                <div class="kpi-value" id="loan-monthly-val">Rp 0</div>
+                <span class="kpi-note" id="loan-interest-note">Total bunga: Rp 0</span>
+              </div>
+              <div class="status-card" id="loan-score-card" data-status="neutral">
+                <span class="kpi-label">Skor Kesiapan Pembiayaan</span>
+                <div class="kpi-value" id="loan-readiness-val">0%</div>
+                <span class="kpi-note" id="loan-readiness-note">Berdasarkan data aplikasi Anda</span>
+              </div>
+            </div>
+
+            <div style="border: var(--card-border); border-radius: var(--rounded-lg); padding: var(--space-md); background: var(--surface-container-low); display: flex; flex-direction: column; gap: var(--space-sm);">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <strong style="font-family: var(--font-headline);">Rasio Angsuran terhadap Pemasukan</strong>
+                <span class="chip" id="loan-ratio-chip" data-status="info">Batas Aman ≤ 35%</span>
+              </div>
+              <div class="range-meter" aria-label="Meter rasio angsuran">
+                <div class="range-meter-safe" title="Zona aman angsuran maksimal 35% dari pemasukan"></div>
+                <div class="range-meter-fill" id="loan-ratio-bar" style="width: 0%;"></div>
+              </div>
+              <p style="margin: 0; font-size: 0.875rem; color: var(--on-surface-variant);" id="loan-ratio-explain">
+                Catat pemasukan di Pembukuan Digital untuk melihat apakah arus kas Anda berada dalam batas aman angsuran (zona hijau ≤ 35%).
+              </p>
+            </div>
+
+            <div style="border: var(--card-border); border-radius: var(--rounded-lg); padding: var(--space-md);">
+              <strong style="font-family: var(--font-headline); display: block; margin-bottom: var(--space-xs);">Rincian Penilaian Kesiapan Otomatis</strong>
+              <ul style="margin: 0; padding-left: var(--space-lg); font-size: 0.9375rem; color: var(--on-surface-variant);" id="loan-breakdown-list"></ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 4: UMKM CONNECT & EKOSISTEM SAPA UMKM -->
+      <section class="workspace-section" data-module-group="komunitas" id="sec-komunitas">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">UMKM Connect — Ruang Komunitas &amp; Kolaborasi</h2>
+            <p class="section-desc">Terhubung dengan sesama pelaku UMKM untuk berbagi pengalaman sertifikasi, strategi pemasaran, dan peluang kolaborasi rantai pasok.</p>
+          </div>
+          <span class="chip" data-status="info" id="community-count-chip">3 Topik Aktif</span>
+        </div>
+
+        <div class="split-layout">
+          <!-- Feed & Filter -->
+          <div style="display: flex; flex-direction: column; gap: var(--space-md);">
+            <div class="form-grid">
+              <div class="field">
+                <label for="comm-search">Cari Topik Komunitas</label>
+                <input type="text" id="comm-search" placeholder="Cari halal, kemasan, KUR, pemasok..." oninput="renderCommunity()">
+              </div>
+              <div class="field">
+                <label for="comm-topic-filter">Filter Kategori</label>
+                <select id="comm-topic-filter" onchange="renderCommunity()">
+                  <option value="semua">Semua Kategori</option>
+                  <option value="Sertifikasi">Sertifikasi &amp; Legalitas</option>
+                  <option value="Permodalan">Permodalan &amp; Kas</option>
+                  <option value="Kolaborasi">Kolaborasi Usaha</option>
+                  <option value="Pemasaran">Pemasaran &amp; Digital</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="community-list" id="community-feed"></div>
+          </div>
+
+          <!-- Buat Kiriman Baru -->
+          <div style="display: flex; flex-direction: column; gap: var(--space-md);">
+            <form onsubmit="addCommunityPost(event)" style="background: var(--surface-container-low); border: var(--card-border); border-radius: var(--rounded-lg); padding: var(--space-md); display: flex; flex-direction: column; gap: var(--space-md);">
+              <strong style="font-family: var(--font-headline); font-size: var(--subhead-size);">Bagikan Pengalaman atau Ajak Kolaborasi</strong>
+              <div class="field">
+                <label for="post-topic">Topik Diskusi</label>
+                <select id="post-topic">
+                  <option value="Kolaborasi">Kolaborasi Usaha</option>
+                  <option value="Sertifikasi">Sertifikasi &amp; Legalitas</option>
+                  <option value="Permodalan">Permodalan &amp; Kas</option>
+                  <option value="Pemasaran">Pemasaran &amp; Digital</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="post-title">Judul Diskusi</label>
+                <input type="text" id="post-title" placeholder="Contoh: Cari mitra pengadaan kemasan ramah lingkungan" required>
+              </div>
+              <div class="field">
+                <label for="post-body">Isi Pesan</label>
+                <textarea id="post-body" placeholder="Ceritakan kebutuhan atau pengalaman usaha Anda..." required></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">Terbitkan ke UMKM Connect</button>
+              <div class="inline-message" id="msg-community" role="status"></div>
+            </form>
+
+            <div class="callout-band">
+              <p class="callout-quote">“UMKM adalah kekuatan ekonomi bangsa. Tugas kita memastikan mereka memiliki akses terhadap data, layanan, dan ekosistem yang mendukung pertumbuhan usahanya.”</p>
+              <span style="font-size: 0.9375rem; font-weight: 600;">— Maman Abdurrahman, Menteri UMKM RI</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 5: PETA EKOSISTEM & MANFAAT NYATA -->
+      <section class="workspace-section" data-module-group="komunitas" id="sec-ekosistem">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Peta Layanan &amp; Manfaat Ekosistem SAPA UMKM</h2>
+            <p class="section-desc">Menghubungkan layanan aktif hari ini dengan modul pengembangan ekosistem yang akan segera hadir.</p>
+          </div>
+        </div>
+
+        <div class="ecosystem-grid">
+          <div class="eco-tile">
+            <span class="chip" data-status="ok" style="align-self: flex-start;">Layanan Aktif</span>
+            <strong style="font-family: var(--font-headline);">Legalitas UMKM</strong>
+            <span style="font-size: 0.875rem; color: var(--on-surface-variant);">Memberikan perlindungan hukum sekaligus membuka akses program pemerintah.</span>
+          </div>
+          <div class="eco-tile">
+            <span class="chip" data-status="ok" style="align-self: flex-start;">Layanan Aktif</span>
+            <strong style="font-family: var(--font-headline);">Peningkatan Kapasitas</strong>
+            <span style="font-size: 0.875rem; color: var(--on-surface-variant);">Platform pelatihan dan pendampingan keterampilan pelaku usaha.</span>
+          </div>
+          <div class="eco-tile">
+            <span class="chip" data-status="warn" style="align-self: flex-start;">Segera Hadir</span>
+            <strong style="font-family: var(--font-headline);">Business Insight</strong>
+            <span style="font-size: 0.875rem; color: var(--on-surface-variant);">Membantu pelaku UMKM memahami tren dan peluang peningkatan kinerja.</span>
+          </div>
+          <div class="eco-tile">
+            <span class="chip" data-status="warn" style="align-self: flex-start;">Segera Hadir</span>
+            <strong style="font-family: var(--font-headline);">Marketplace UMKM</strong>
+            <span style="font-size: 0.875rem; color: var(--on-surface-variant);">Membuka akses pemasaran produk untuk menjangkau pasar lebih luas.</span>
+          </div>
+          <div class="eco-tile">
+            <span class="chip" data-status="warn" style="align-self: flex-start;">Segera Hadir</span>
+            <strong style="font-family: var(--font-headline);">Survei UMKM</strong>
+            <span style="font-size: 0.875rem; color: var(--on-surface-variant);">Pengumpulan data UMKM akurat untuk pengembangan kebijakan usaha.</span>
+          </div>
+        </div>
+
+        <div style="background: var(--surface-container-low); padding: var(--space-md) var(--space-lg); border-radius: var(--rounded-lg); border: var(--card-border);">
+          <strong style="font-family: var(--font-headline); display: block; margin-bottom: var(--space-sm);">Manfaat Nyata untuk Ekosistem UMKM Nasional</strong>
+          <ul class="benefits-list">
+            <li>Identifikasi dan verifikasi UMKM secara lebih akurat</li>
+            <li>Distribusi bantuan dan program yang lebih tepat sasaran</li>
+            <li>Efisiensi anggaran melalui kolaborasi lintas institusi</li>
+            <li>Integrasi data nasional UMKM dalam satu ekosistem</li>
+            <li>Peningkatan kesejahteraan masyarakat dan penciptaan lapangan kerja</li>
+          </ul>
+        </div>
+      </section>
+
+      <footer class="portal-footer">
+        <span>Disusun dari materi sumber SAPA UMKM — Kementerian UMKM RI (2026). Data yang Anda masukkan disimpan langsung di ruang sesi ini.</span>
+        <span>Platform Layanan Terpadu UMKM Indonesia</span>
+      </footer>
+
+    </main>
+  </div>
+
+  <api-shim></api-shim>
+  <script>
+    const VERIFICATION_STEPS = [
+      { id: `v_ktp`, title: `Verifikasi Identitas Pemilik (e-KTP)`, sub: `Validasi NIK penanggung jawab usaha` },
+      { id: `v_nib`, title: `Legalitas Dasar & NIB`, sub: `Kepemilikan Nomor Induk Berusaha / SKU` },
+      { id: `v_lokasi`, title: `Lokasi & Bukti Operasional Usaha`, sub: `Alamat produksi/gerai dan foto kegiatan usaha` },
+      { id: `v_rekening`, title: `Tautan Rekening / Dompet Usaha`, sub: `Akun penerimaan dana dan transaksi digital` }
+    ];
+
+    const CAPACITY_MODULES = [
+      { id: `cap_keuangan`, title: `Literasi & Pembukuan Keuangan`, sub: `Pemisahan kas pribadi dan kas usaha` },
+      { id: `cap_digital`, title: `Pemasaran Digital & QRIS`, sub: `Optimalisasi transaksi non-tunai dan katalog` },
+      { id: `cap_mutu`, title: `Manajemen Mutu & Standarisasi`, sub: `Kesiapan pengemasan dan izin edar` }
+    ];
+
+    const CERT_SCHEMES = [
+      {
+        id: `halal`,
+        title: `Sertifikasi Halal`,
+        authority: `BPJPH / Pendamping PPH`,
+        desc: `Menjamin kehalalan bahan baku dan proses produksi untuk produk pangan dan konsumsi.`,
+        items: [
+          { id: `h_bahan`, label: `Daftar bahan baku & pemasok tersusun` },
+          { id: `h_proses`, label: `Alur proses produksi bebas kontaminasi` },
+          { id: `h_ikrar`, label: `Pernyataan pelaku usaha (Self-Declare / Reguler)` }
+        ]
+      },
+      {
+        id: `merek`,
+        title: `Sertifikasi Merek (HAKI)`,
+        authority: `DJKI Kemenkumham`,
+        desc: `Melindungi nama dagang dan logo usaha agar eksklusif dan aman secara hukum.`,
+        items: [
+          { id: `m_telusur`, label: `Pengecekan kemiripan merek pada kelas produk` },
+          { id: `m_etiket`, label: `Etiket / logo merek resolusi tinggi siap` },
+          { id: `m_umk`, label: `Surat rekomendasi / status UMK untuk tarif keringanan` }
+        ]
+      },
+      {
+        id: `standar`,
+        title: `Standar Produk (P-IRT / SNI)`,
+        authority: `Dinas Kesehatan / BSN`,
+        desc: `Memenuhi standar keamanan pangan, pelabelan kemasan, dan kelayakan edar ritel.`,
+        items: [
+          { id: `s_label`, label: `Desain label mencantumkan komposisi & kedaluwarsa` },
+          { id: `s_hygiene`, label: `Penyuluhan Keamanan Pangan / standar bengkel kerja` },
+          { id: `s_uji`, label: `Uji masa simpan atau spesifikasi mutu produk` }
+        ]
+      }
+    ];
+
+    const DEFAULT_COMMUNITY_POSTS = [
+      {
+        id: `post_1`,
+        author: `Siti Aminah — Dapur Sehat Nusantara`,
+        topic: `Sertifikasi`,
+        title: `Tips mempercepat verifikasi Halal Self-Declare untuk produk olahan`,
+        body: `Pastikan seluruh bahan kemasan pabrikan sudah mencantumkan nomor ketetapan halal di labelnya sebelum diunggah agar verifikasi pendamping selesai dalam 7 hari kerja.`,
+        time: `Contoh Diskusi Ekosistem`,
+        likes: 12,
+        likedByMe: false,
+        replies: [
+          { author: `Pendamping UMKM`, text: `Benar, foto daftar bahan dan alur dapur yang terang sangat membantu proses tinjauan.` }
+        ]
+      },
+      {
+        id: `post_2`,
+        author: `Budi Santoso — Kriya Kayu Sejahtera`,
+        topic: `Permodalan`,
+        title: `Pembukuan digital rapi mempermudah pengajuan KUR Mikro`,
+        body: `Sejak rutin mencatat penjualan harian dan transaksi QRIS di satu buku kas, analisis arus kas bulanan saat pengajuan modal jauh lebih cepat disetujui.`,
+        time: `Contoh Diskusi Ekosistem`,
+        likes: 9,
+        likedByMe: false,
+        replies: []
+      },
+      {
+        id: `post_3`,
+        author: `Rina Kartika — Tenun Mandiri`,
+        topic: `Kolaborasi`,
+        title: `Mencari sesama UMKM kriya untuk patungan cetak kemasan ekspor`,
+        body: `Kami berencana mencetak kotak kemasan custom minimal order 1.000 pcs di wilayah Jawa Tengah. Terbuka untuk 2–3 UMKM lain agar biaya satuan lebih hemat.`,
+        time: `Contoh Diskusi Ekosistem`,
+        likes: 7,
+        likedByMe: false,
+        replies: []
+      }
+    ];
+
+    function createEmptyState() {
+      const today = new Date().toISOString().slice(0, 10);
+      return {
+        profile: {
+          name: ``,
+          owner: ``,
+          sector: `Kuliner & Olahan Pangan`,
+          scale: `Usaha Mikro`,
+          nib: ``,
+          city: ``,
+          kartuId: `KUS-2026-` + String(Math.floor(1000 + Math.random() * 8999))
+        },
+        verification: {},
+        capacity: {},
+        transactions: [],
+        walletBalance: 0,
+        walletLedger: [],
+        certifications: {},
+        financing: {
+          amount: 35000000,
+          tenor: 24,
+          rate: `6`
+        },
+        posts: JSON.parse(JSON.stringify(DEFAULT_COMMUNITY_POSTS)),
+        todayDate: today
+      };
+    }
+
+    let appState = createEmptyState();
+    let cashflowChartInstance = null;
+
+    function formatRupiah(num) {
+      const n = Number(num) || 0;
+      const abs = Math.abs(Math.round(n));
+      const formatted = abs.toLocaleString(`id-ID`);
+      return n < 0 ? `-Rp ` + formatted : `Rp ` + formatted;
+    }
+
+    function escapeHtml(str) {
+      return String(str || ``)
+        .replace(/&/g, `&amp;`)
+        .replace(/</g, `&lt;`)
+        .replace(/>/g, `&gt;`)
+        .replace(/"/g, `&quot;`)
+        .replace(/'/g, `&#39;`);
+    }
+
+    function showInlineMessage(id, text, tone) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = text;
+      el.setAttribute(`data-tone`, tone || `info`);
+      el.classList.add(`is-visible`);
+      setTimeout(function () {
+        el.classList.remove(`is-visible`);
+      }, 4500);
+    }
+
+    function updateSaveIndicator(label) {
+      const txt = document.getElementById(`save-status-text`);
+      if (txt) txt.textContent = label;
+    }
+
+    async function persistState() {
+      updateSaveIndicator(`Menyimpan perubahan…`);
+      try {
+        if (window.notebookAppApi && typeof window.notebookAppApi.setAppState === `function`) {
+          await window.notebookAppApi.setAppState(appState);
+        }
+        updateSaveIndicator(`Tersimpan di sesi`);
+      } catch (err) {
+        updateSaveIndicator(`Gagal menyimpan`);
+      }
+    }
+
+    function getCssToken(name) {
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
+
+    /* ---------- MODULE FILTERING ---------- */
+    function filterModules(group, btnEl) {
+      const pills = document.querySelectorAll(`.nav-pill`);
+      pills.forEach(function (p) {
+        p.setAttribute(`aria-pressed`, `false`);
+      });
+      if (btnEl) btnEl.setAttribute(`aria-pressed`, `true`);
+
+      const sections = document.querySelectorAll(`.workspace-section`);
+      sections.forEach(function (sec) {
+        const secGroup = sec.getAttribute(`data-module-group`);
+        if (group === `all` || secGroup === group) {
+          sec.classList.remove(`is-hidden`);
+        } else {
+          sec.classList.add(`is-hidden`);
+        }
+      });
+    }
+
+    /* ---------- VERIFICATION & KARTU USAHA ---------- */
+    function saveBusinessProfile(e) {
+      e.preventDefault();
+      const nameEl = document.getElementById(`biz-name`);
+      const ownerEl = document.getElementById(`biz-owner`);
+      const sectorEl = document.getElementById(`biz-sector`);
+      const scaleEl = document.getElementById(`biz-scale`);
+      const nibEl = document.getElementById(`biz-nib`);
+      const cityEl = document.getElementById(`biz-city`);
+      if (!nameEl || !ownerEl) return;
+
+      const nameVal = nameEl.value.trim();
+      const ownerVal = ownerEl.value.trim();
+      if (nameVal.length < 2 || ownerVal.length < 2) {
+        showInlineMessage(`msg-profile`, `Mohon isi nama usaha dan nama pemilik minimal 2 karakter.`, `alert`);
+        return;
+      }
+
+      appState.profile.name = nameVal;
+      appState.profile.owner = ownerVal;
+      appState.profile.sector = sectorEl ? sectorEl.value : appState.profile.sector;
+      appState.profile.scale = scaleEl ? scaleEl.value : appState.profile.scale;
+      appState.profile.nib = nibEl ? nibEl.value.trim() : ``;
+      appState.profile.city = cityEl ? cityEl.value.trim() : ``;
+
+      if (appState.profile.nib.length >= 6) {
+        appState.verification.v_nib = true;
+      }
+
+      renderAll();
+      persistState();
+      showInlineMessage(`msg-profile`, `Profil usaha dan data Kartu Usaha berhasil diperbarui.`, `ok`);
+    }
+
+    function toggleVerificationStep(stepId) {
+      appState.verification[stepId] = !appState.verification[stepId];
+      renderAll();
+      persistState();
+    }
+
+    function toggleCapacityModule(capId) {
+      appState.capacity[capId] = !appState.capacity[capId];
+      renderAll();
+      persistState();
+    }
+
+    function renderVerificationAndKartu() {
+      const p = appState.profile;
+      const setVal = function (id, val) {
+        const el = document.getElementById(id);
+        if (el && document.activeElement !== el) el.value = val || ``;
+      };
+      setVal(`biz-name`, p.name);
+      setVal(`biz-owner`, p.owner);
+      setVal(`biz-sector`, p.sector);
+      setVal(`biz-scale`, p.scale);
+      setVal(`biz-nib`, p.nib);
+      setVal(`biz-city`, p.city);
+
+      const verifContainer = document.getElementById(`verif-checklist`);
+      if (verifContainer) {
+        verifContainer.innerHTML = VERIFICATION_STEPS.map(function (st) {
+          const checked = Boolean(appState.verification[st.id]);
+          return `<label class="check-row">
+            <input type="checkbox" ${checked ? `checked` : ``} onchange="toggleVerificationStep('${st.id}')">
+            <span>
+              <span class="check-title">${escapeHtml(st.title)}</span>
+              <span class="check-sub">${escapeHtml(st.sub)}</span>
+            </span>
+          </label>`;
+        }).join(``);
+      }
+
+      const capContainer = document.getElementById(`capacity-checklist`);
+      if (capContainer) {
+        capContainer.innerHTML = CAPACITY_MODULES.map(function (cm) {
+          const checked = Boolean(appState.capacity[cm.id]);
+          return `<label class="check-row">
+            <input type="checkbox" ${checked ? `checked` : ``} onchange="toggleCapacityModule('${cm.id}')">
+            <span>
+              <span class="check-title">${escapeHtml(cm.title)}</span>
+              <span class="check-sub">${escapeHtml(cm.sub)}</span>
+            </span>
+          </label>`;
+        }).join(``);
+      }
+
+      const verifDone = VERIFICATION_STEPS.filter(function (s) { return Boolean(appState.verification[s.id]); }).length;
+      const verifPct = Math.round((verifDone / VERIFICATION_STEPS.length) * 100);
+      const capDone = CAPACITY_MODULES.filter(function (c) { return Boolean(appState.capacity[c.id]); }).length;
+
+      const pctEl = document.getElementById(`verif-progress-pct`);
+      const barEl = document.getElementById(`verif-progress-bar`);
+      if (pctEl) pctEl.textContent = verifPct + `%`;
+      if (barEl) barEl.style.width = verifPct + `%`;
+
+      const isFullyVerified = verifDone === VERIFICATION_STEPS.length && p.name.trim().length > 0;
+      const verifBadge = document.getElementById(`badge-verif-status`);
+      const kartuChip = document.getElementById(`kartu-status-chip`);
+      if (verifBadge) {
+        if (isFullyVerified) {
+          verifBadge.textContent = `Terverifikasi Penuh`;
+          verifBadge.setAttribute(`data-status`, `ok`);
+        } else if (verifDone > 0) {
+          verifBadge.textContent = `Verifikasi ` + verifDone + `/4`;
+          verifBadge.setAttribute(`data-status`, `info`);
+        } else {
+          verifBadge.textContent = `Belum Terverifikasi`;
+          verifBadge.setAttribute(`data-status`, `neutral`);
+        }
+      }
+      if (kartuChip) {
+        if (isFullyVerified) {
+          kartuChip.textContent = `Kartu Aktif`;
+          kartuChip.setAttribute(`data-status`, `ok`);
+        } else {
+          kartuChip.textContent = p.name ? `Pra-Aktivasi (` + verifDone + `/4)` : `Menunggu Profil`;
+          kartuChip.setAttribute(`data-status`, `neutral`);
+        }
+      }
+
+      const idEl = document.getElementById(`kartu-id-display`);
+      const nameEl = document.getElementById(`kartu-name-display`);
+      const ownerEl = document.getElementById(`kartu-owner-display`);
+      const secEl = document.getElementById(`kartu-sector-display`);
+      const cityEl = document.getElementById(`kartu-city-display`);
+      const capCountEl = document.getElementById(`kartu-cap-count`);
+      const tierEl = document.getElementById(`kartu-tier-chip`);
+
+      if (idEl) idEl.textContent = `ID: ` + (p.kartuId || `KUS-2026-0000`);
+      if (nameEl) nameEl.textContent = p.name ? p.name : `Nama Usaha Belum Diisi`;
+      if (ownerEl) ownerEl.textContent = `Pemilik: ` + (p.owner ? p.owner : `—`);
+      if (secEl) secEl.textContent = p.sector + ` (` + p.scale + `)`;
+      if (cityEl) cityEl.textContent = (p.city || `Wilayah belum diisi`) + (p.nib ? ` · NIB ` + p.nib : ``);
+      if (capCountEl) capCountEl.textContent = capDone + ` / ` + CAPACITY_MODULES.length + ` Modul`;
+      if (tierEl) {
+        if (capDone === 3) {
+          tierEl.textContent = `Tingkat Mandiri`;
+          tierEl.setAttribute(`data-status`, `ok`);
+        } else if (capDone >= 1) {
+          tierEl.textContent = `Tingkat Berkembang`;
+          tierEl.setAttribute(`data-status`, `info`);
+        } else {
+          tierEl.textContent = `Tingkat Rintisan`;
+          tierEl.setAttribute(`data-status`, `neutral`);
+        }
+      }
+    }
+
+    /* ---------- PEMBUKUAN DIGITAL ---------- */
+    function syncCategoryOptions() {
+      const typeEl = document.getElementById(`tx-type`);
+      const catEl = document.getElementById(`tx-category`);
+      if (!typeEl || !catEl) return;
+      if (typeEl.value === `masuk`) {
+        catEl.innerHTML = `
+          <option value="Penjualan Produk">Penjualan Produk</option>
+          <option value="Pembayaran Jasa">Pembayaran Jasa</option>
+          <option value="Pembayaran QRIS">Pembayaran QRIS</option>
+          <option value="Modal / Hibah">Modal / Hibah</option>
+        `;
+      } else {
+        catEl.innerHTML = `
+          <option value="Bahan Baku">Bahan Baku</option>
+          <option value="Operasional & Listrik">Operasional &amp; Listrik</option>
+          <option value="Kemasan & Promosi">Kemasan &amp; Promosi</option>
+          <option value="Upah & Transportasi">Upah &amp; Transportasi</option>
+        `;
+      }
+    }
+
+    function addBookkeepingEntry(e) {
+      e.preventDefault();
+      const typeEl = document.getElementById(`tx-type`);
+      const catEl = document.getElementById(`tx-category`);
+      const amtEl = document.getElementById(`tx-amount`);
+      const dateEl = document.getElementById(`tx-date`);
+      const noteEl = document.getElementById(`tx-note`);
+      if (!typeEl || !catEl || !amtEl || !dateEl || !noteEl) return;
+
+      const amount = Number(amtEl.value);
+      const note = noteEl.value.trim();
+      if (!Number.isFinite(amount) || amount <= 0) {
+        showInlineMessage(`msg-tx`, `Masukkan nominal transaksi yang valid (lebih dari Rp 0).`, `alert`);
+        return;
+      }
+      if (note.length < 2) {
+        showInlineMessage(`msg-tx`, `Masukkan keterangan transaksi minimal 2 karakter.`, `alert`);
+        return;
+      }
+
+      appState.transactions.unshift({
+        id: `tx_` + Date.now() + `_` + Math.floor(Math.random() * 1000),
+        type: typeEl.value,
+        category: catEl.value,
+        amount: amount,
+        date: dateEl.value || appState.todayDate,
+        note: note
+      });
+
+      amtEl.value = ``;
+      noteEl.value = ``;
+      renderAll();
+      persistState();
+      showInlineMessage(`msg-tx`, `Transaksi berhasil dicatat ke Pembukuan Digital.`, `ok`);
+    }
+
+    function deleteBookkeepingEntry(txId) {
+      appState.transactions = appState.transactions.filter(function (t) { return t.id !== txId; });
+      renderAll();
+      persistState();
+    }
+
+    function renderBookkeeping() {
+      const dateEl = document.getElementById(`tx-date`);
+      if (dateEl && !dateEl.value) {
+        dateEl.value = appState.todayDate || new Date().toISOString().slice(0, 10);
+      }
+
+      const filterEl = document.getElementById(`tx-filter-type`);
+      const filterVal = filterEl ? filterEl.value : `semua`;
+
+      let totalIn = 0;
+      let totalOut = 0;
+      appState.transactions.forEach(function (t) {
+        if (t.type === `masuk`) totalIn += Number(t.amount) || 0;
+        else totalOut += Number(t.amount) || 0;
+      });
+
+      const sumInEl = document.getElementById(`sum-in`);
+      const sumOutEl = document.getElementById(`sum-out`);
+      if (sumInEl) sumInEl.textContent = formatRupiah(totalIn);
+      if (sumOutEl) sumOutEl.textContent = formatRupiah(totalOut);
+
+      const healthBadge = document.getElementById(`badge-cash-health`);
+      const net = totalIn - totalOut;
+      if (healthBadge) {
+        if (appState.transactions.length === 0) {
+          healthBadge.textContent = `Menunggu Transaksi`;
+          healthBadge.setAttribute(`data-status`, `neutral`);
+        } else if (net >= 0) {
+          const marginPct = totalIn > 0 ? Math.round((net / totalIn) * 100) : 0;
+          healthBadge.textContent = `Surplus · Margin ` + marginPct + `%`;
+          healthBadge.setAttribute(`data-status`, `ok`);
+        } else {
+          healthBadge.textContent = `Defisit Arus Kas`;
+          healthBadge.setAttribute(`data-status`, `alert`);
+        }
+      }
+
+      const filtered = appState.transactions.filter(function (t) {
+        return filterVal === `semua` || t.type === filterVal;
+      });
+
+      const container = document.getElementById(`tx-table-container`);
+      if (!container) return;
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="empty-state">
+          <h3>Belum ada catatan transaksi</h3>
+          <p>Catat pemasukan atau pengeluaran pertama Anda melalui formulir di atas, atau klik “Muat Simulasi Usaha” di bagian atas untuk melihat contoh pembukuan lengkap.</p>
+        </div>`;
+      } else {
+        const rows = filtered.map(function (t) {
+          const isIn = t.type === `masuk`;
+          const chipStatus = isIn ? `ok` : `alert`;
+          const chipLabel = isIn ? `Masuk` : `Keluar`;
+          return `<tr>
+            <td>${escapeHtml(t.date)}</td>
+            <td><span class="chip" data-status="${chipStatus}">${chipLabel}</span></td>
+            <td>${escapeHtml(t.category)}</td>
+            <td>${escapeHtml(t.note)}</td>
+            <td class="num-col" style="color: ${isIn ? `var(--secondary)` : `var(--error)`};">${isIn ? `+` : `-`}${formatRupiah(t.amount)}</td>
+            <td style="text-align: right;">
+              <button type="button" class="btn btn-danger-outline btn-sm" onclick="deleteBookkeepingEntry('${t.id}')" aria-label="Hapus transaksi ${escapeHtml(t.note)}">Hapus</button>
+            </td>
+          </tr>`;
+        }).join(``);
+
+        container.innerHTML = `<div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Tanggal</th>
+                <th>Jenis</th>
+                <th>Kategori</th>
+                <th>Keterangan</th>
+                <th style="text-align: right;">Nominal</th>
+                <th style="text-align: right;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>`;
+      }
+
+      renderCashflowChart(totalIn, totalOut);
+    }
+
+    function renderCashflowChart(totalIn, totalOut) {
+      const canvas = document.getElementById(`cashflow-chart`);
+      if (!canvas || typeof Chart === `undefined`) return;
+
+      const catTotals = {};
+      appState.transactions.forEach(function (t) {
+        const key = t.category;
+        if (!catTotals[key]) catTotals[key] = { masuk: 0, keluar: 0 };
+        if (t.type === `masuk`) catTotals[key].masuk += Number(t.amount) || 0;
+        else catTotals[key].keluar += Number(t.amount) || 0;
+      });
+
+      const labels = Object.keys(catTotals);
+      const hasData = labels.length > 0;
+      const chartLabels = hasData ? labels : [`Belum ada data`];
+      const dataIn = hasData ? labels.map(function (k) { return catTotals[k].masuk; }) : [0];
+      const dataOut = hasData ? labels.map(function (k) { return catTotals[k].keluar; }) : [0];
+      const healthyBenchmark = hasData ? labels.map(function () { return Math.round(totalIn * 0.8); }) : [0];
+
+      const cPrimary = getCssToken(`--data-1`) || `#0f7c8a`;
+      const cPositive = getCssToken(`--data-2`) || `#2e7d4f`;
+      const cError = getCssToken(`--error`) || `#b3261e`;
+      const cGrid = getCssToken(`--outline-variant`) || `#d5e3e5`;
+      const cText = getCssToken(`--on-surface-variant`) || `#46585f`;
+
+      if (cashflowChartInstance) {
+        cashflowChartInstance.destroy();
+      }
+
+      cashflowChartInstance = new Chart(canvas.getContext(`2d`), {
+        type: `bar`,
+        data: {
+          labels: chartLabels,
+          datasets: [
+            {
+              label: `Pemasukan (Rp)`,
+              data: dataIn,
+              backgroundColor: cPositive,
+              borderRadius: 4
+            },
+            {
+              label: `Pengeluaran (Rp)`,
+              data: dataOut,
+              backgroundColor: cError,
+              borderRadius: 4
+            },
+            {
+              label: `Batas Aman Pengeluaran Total (80% Omzet)`,
+              data: healthyBenchmark,
+              type: `line`,
+              borderColor: cPrimary,
+              borderDash: [6, 4],
+              borderWidth: 2,
+              pointRadius: 0,
+              fill: false
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: `bottom`,
+              labels: { color: cText, boxWidth: 12 }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { color: cText }
+            },
+            y: {
+              beginAtZero: true,
+              grid: { color: cGrid },
+              ticks: {
+                color: cText,
+                callback: function (val) {
+                  return `Rp ` + Number(val).toLocaleString(`id-ID`);
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    /* ---------- DOMPET DIGITAL ---------- */
+    function processWalletAction(e) {
+      e.preventDefault();
+      const typeEl = document.getElementById(`wallet-action-type`);
+      const amtEl = document.getElementById(`wallet-amount`);
+      const descEl = document.getElementById(`wallet-desc`);
+      const syncEl = document.getElementById(`wallet-sync-book`);
+      if (!typeEl || !amtEl || !descEl) return;
+
+      const action = typeEl.value;
+      const amount = Number(amtEl.value);
+      const desc = descEl.value.trim();
+
+      if (!Number.isFinite(amount) || amount < 1000) {
+        showInlineMessage(`msg-wallet`, `Nominal mutasi minimal Rp 1.000.`, `alert`);
+        return;
+      }
+      if (desc.length < 2) {
+        showInlineMessage(`msg-wallet`, `Mohon isi keterangan mutasi.`, `alert`);
+        return;
+      }
+
+      const isOutflow = action === `withdraw` || action === `pay`;
+      if (isOutflow && amount > appState.walletBalance) {
+        showInlineMessage(`msg-wallet`, `Saldo Dompet Digital tidak mencukupi. Saldo tersedia: ` + formatRupiah(appState.walletBalance) + `.`, `alert`);
+        return;
+      }
+
+      if (isOutflow) {
+        appState.walletBalance -= amount;
+      } else {
+        appState.walletBalance += amount;
+      }
+
+      const labelMap = {
+        qris: `Pembayaran QRIS`,
+        topup: `Isi Saldo Modal`,
+        withdraw: `Tarik ke Bank`,
+        pay: `Bayar Pemasok`
+      };
+
+      appState.walletLedger.unshift({
+        id: `wl_` + Date.now(),
+        action: action,
+        label: labelMap[action] || action,
+        amount: amount,
+        isOut: isOutflow,
+        desc: desc,
+        date: appState.todayDate || new Date().toISOString().slice(0, 10)
+      });
+
+      const shouldSync = syncEl && syncEl.checked && (action === `qris` || action === `pay`);
+      if (shouldSync) {
+        appState.transactions.unshift({
+          id: `tx_w_` + Date.now(),
+          type: action === `qris` ? `masuk` : `keluar`,
+          category: action === `qris` ? `Pembayaran QRIS` : `Bahan Baku`,
+          amount: amount,
+          date: appState.todayDate || new Date().toISOString().slice(0, 10),
+          note: `[Dompet] ` + desc
+        });
+      }
+
+      amtEl.value = ``;
+      descEl.value = ``;
+      renderAll();
+      persistState();
+      showInlineMessage(`msg-wallet`, `Mutasi Dompet Digital berhasil diproses` + (shouldSync ? ` dan disinkronkan ke Pembukuan.` : `.`), `ok`);
+    }
+
+    function renderWallet() {
+      const balMain = document.getElementById(`wallet-balance-main`);
+      if (balMain) balMain.textContent = formatRupiah(appState.walletBalance);
+
+      const ledgerEl = document.getElementById(`wallet-ledger`);
+      if (!ledgerEl) return;
+
+      if (appState.walletLedger.length === 0) {
+        ledgerEl.innerHTML = `<p style="margin: 0; color: var(--on-surface-variant); font-size: 0.9375rem;">Belum ada mutasi dompet. Coba simulasi terima pembayaran QRIS atau isi saldo modal di atas.</p>`;
+        return;
+      }
+
+      ledgerEl.innerHTML = `<div class="ledger-list">` + appState.walletLedger.slice(0, 6).map(function (item) {
+        return `<div class="ledger-item">
+          <div>
+            <div style="font-family: var(--font-headline); font-weight: 700;">${escapeHtml(item.desc)}</div>
+            <div style="font-size: 0.8125rem; color: var(--on-surface-variant);">${escapeHtml(item.label)} &middot; ${escapeHtml(item.date)}</div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-family: var(--font-headline); font-weight: 800; color: ${item.isOut ? `var(--error)` : `var(--secondary)`}; font-variant-numeric: tabular-nums;">
+              ${item.isOut ? `-` : `+`}${formatRupiah(item.amount)}
+            </div>
+          </div>
+        </div>`;
+      }).join(``) + `</div>`;
+    }
+
+    /* ---------- SERTIFIKASI ---------- */
+    function toggleCertItem(itemId) {
+      appState.certifications[itemId] = !appState.certifications[itemId];
+      renderAll();
+      persistState();
+    }
+
+    function renderCertifications() {
+      const container = document.getElementById(`cert-cards-container`);
+      if (!container) return;
+
+      let readyCount = 0;
+
+      container.innerHTML = CERT_SCHEMES.map(function (scheme) {
+        const done = scheme.items.filter(function (it) { return Boolean(appState.certifications[it.id]); }).length;
+        const total = scheme.items.length;
+        const pct = Math.round((done / total) * 100);
+        const isComplete = done === total;
+        if (isComplete) readyCount += 1;
+
+        let chipStatus = `neutral`;
+        let chipText = `Belum Dimulai`;
+        if (isComplete) {
+          chipStatus = `ok`;
+          chipText = `Siap Diajukan`;
+        } else if (done > 0) {
+          chipStatus = `info`;
+          chipText = `Proses (` + done + `/` + total + `)`;
+        }
+
+        const itemsHtml = scheme.items.map(function (it) {
+          const checked = Boolean(appState.certifications[it.id]);
+          return `<label class="check-row" style="padding: var(--space-xs) var(--space-sm);">
+            <input type="checkbox" ${checked ? `checked` : ``} onchange="toggleCertItem('${it.id}')">
+            <span class="check-sub" style="color: var(--on-surface);">${escapeHtml(it.label)}</span>
+          </label>`;
+        }).join(``);
+
+        return `<article class="cert-card" data-complete="${isComplete ? `true` : `false`}">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-sm);">
+            <div>
+              <h3 style="font-size: var(--subhead-size); font-weight: 800;">${escapeHtml(scheme.title)}</h3>
+              <span class="kpi-label">${escapeHtml(scheme.authority)}</span>
+            </div>
+            <span class="chip" data-status="${chipStatus}">${chipText}</span>
+          </div>
+          <p style="margin: 0; font-size: 0.9375rem; color: var(--on-surface-variant);">${escapeHtml(scheme.desc)}</p>
+          <div class="progress-track"><div class="progress-fill" style="width: ${pct}%;"></div></div>
+          <div class="checklist">${itemsHtml}</div>
+        </article>`;
+      }).join(``);
+
+      const badge = document.getElementById(`badge-cert-summary`);
+      if (badge) {
+        badge.textContent = readyCount + ` / 3 Sertifikasi Siap`;
+        badge.setAttribute(`data-status`, readyCount > 0 ? `ok` : `info`);
+      }
+    }
+
+    /* ---------- PEMBIAYAAN UMKM (DUAL-SYNC SLIDER) ---------- */
+    function syncLoanAmountFromSlider(val) {
+      const numEl = document.getElementById(`input-loan-amount`);
+      if (numEl) numEl.value = val;
+      appState.financing.amount = Number(val) || 5000000;
+      updateFinancingCalc(true);
+    }
+
+    function syncLoanAmountFromNumber(val) {
+      const sliderEl = document.getElementById(`slider-loan-amount`);
+      const clamped = Math.max(1000000, Math.min(500000000, Number(val) || 1000000));
+      if (sliderEl) sliderEl.value = Math.min(250000000, clamped);
+      appState.financing.amount = clamped;
+      updateFinancingCalc(true);
+    }
+
+    function syncLoanTenorFromSlider(val) {
+      const numEl = document.getElementById(`input-loan-tenor`);
+      if (numEl) numEl.value = val;
+      appState.financing.tenor = Number(val) || 12;
+      updateFinancingCalc(true);
+    }
+
+    function syncLoanTenorFromNumber(val) {
+      const sliderEl = document.getElementById(`slider-loan-tenor`);
+      const clamped = Math.max(3, Math.min(60, Number(val) || 12));
+      if (sliderEl) sliderEl.value = Math.max(6, clamped);
+      appState.financing.tenor = clamped;
+      updateFinancingCalc(true);
+    }
+
+    function applyLoanPreset(amount, tenor, rate) {
+      appState.financing.amount = amount;
+      appState.financing.tenor = tenor;
+      appState.financing.rate = rate;
+      const schemeEl = document.getElementById(`loan-scheme`);
+      const sAmt = document.getElementById(`slider-loan-amount`);
+      const nAmt = document.getElementById(`input-loan-amount`);
+      const sTen = document.getElementById(`slider-loan-tenor`);
+      const nTen = document.getElementById(`input-loan-tenor`);
+      if (schemeEl) schemeEl.value = rate;
+      if (sAmt) sAmt.value = Math.min(250000000, amount);
+      if (nAmt) nAmt.value = amount;
+      if (sTen) sTen.value = tenor;
+      if (nTen) nTen.value = tenor;
+      updateFinancingCalc(true);
+    }
+
+    function computeReadinessScore(monthlyInstallment) {
+      const verifDone = VERIFICATION_STEPS.filter(function (s) { return Boolean(appState.verification[s.id]); }).length;
+      const verifScore = Math.round((verifDone / VERIFICATION_STEPS.length) * 30);
+
+      const txCount = appState.transactions.length;
+      const bookScore = txCount >= 4 ? 25 : Math.round((txCount / 4) * 25);
+
+      const certReadyCount = CERT_SCHEMES.filter(function (sc) {
+        return sc.items.some(function (it) { return Boolean(appState.certifications[it.id]); });
+      }).length;
+      const certScore = Math.round((certReadyCount / 3) * 25);
+
+      let totalIn = 0;
+      let totalOut = 0;
+      appState.transactions.forEach(function (t) {
+        if (t.type === `masuk`) totalIn += Number(t.amount) || 0;
+        else totalOut += Number(t.amount) || 0;
+      });
+      const netCash = totalIn - totalOut;
+      let cashScore = 0;
+      if (totalIn > 0 && netCash >= monthlyInstallment) {
+        cashScore = 20;
+      } else if (totalIn > 0 && netCash > 0) {
+        cashScore = 10;
+      }
+
+      return {
+        total: verifScore + bookScore + certScore + cashScore,
+        verifScore: verifScore,
+        bookScore: bookScore,
+        certScore: certScore,
+        cashScore: cashScore,
+        totalIn: totalIn,
+        netCash: netCash
+      };
+    }
+
+    function updateFinancingCalc(shouldPersist) {
+      const schemeEl = document.getElementById(`loan-scheme`);
+      const ratePct = schemeEl ? Number(schemeEl.value) : Number(appState.financing.rate || 6);
+      appState.financing.rate = String(ratePct);
+
+      const principal = Number(appState.financing.amount) || 35000000;
+      const months = Math.max(1, Number(appState.financing.tenor) || 24);
+      const totalInterest = principal * (ratePct / 100) * (months / 12);
+      const monthly = Math.round((principal + totalInterest) / months);
+
+      const monthlyEl = document.getElementById(`loan-monthly-val`);
+      const interestNoteEl = document.getElementById(`loan-interest-note`);
+      if (monthlyEl) monthlyEl.textContent = formatRupiah(monthly);
+      if (interestNoteEl) interestNoteEl.textContent = `Total bunga (${ratePct}%/thn): ` + formatRupiah(totalInterest);
+
+      const scoreData = computeReadinessScore(monthly);
+      const scoreEl = document.getElementById(`loan-readiness-val`);
+      const scoreCard = document.getElementById(`loan-score-card`);
+      const scoreNote = document.getElementById(`loan-readiness-note`);
+      if (scoreEl) scoreEl.textContent = scoreData.total + `%`;
+      if (scoreCard) {
+        scoreCard.setAttribute(`data-status`, scoreData.total >= 70 ? `ok` : (scoreData.total >= 40 ? `neutral` : `alert`));
+      }
+      if (scoreNote) {
+        scoreNote.textContent = scoreData.total >= 70 ? `Kesiapan tinggi untuk pengajuan` : (scoreData.total >= 40 ? `Perlu lengkapi verifikasi & kas` : `Lengkapi data usaha terlebih dahulu`);
+      }
+
+      const ratioBar = document.getElementById(`loan-ratio-bar`);
+      const ratioChip = document.getElementById(`loan-ratio-chip`);
+      const ratioExplain = document.getElementById(`loan-ratio-explain`);
+
+      if (scoreData.totalIn > 0) {
+        const ratio = Math.min(100, Math.round((monthly / scoreData.totalIn) * 100));
+        if (ratioBar) {
+          ratioBar.style.width = ratio + `%`;
+          ratioBar.style.backgroundColor = ratio <= 35 ? `var(--tertiary)` : `var(--error)`;
+        }
+        if (ratioChip) {
+          ratioChip.textContent = `Rasio Angsuran: ` + ratio + `%`;
+          ratioChip.setAttribute(`data-status`, ratio <= 35 ? `ok` : `alert`);
+        }
+        if (ratioExplain) {
+          ratioExplain.textContent = ratio <= 35
+            ? `Sehat: angsuran bulanan hanya ${ratio}% dari total pemasukan tercatat (di bawah batas aman 35%).`
+            : `Perhatian: angsuran mencapai ${ratio}% dari pemasukan tercatat. Pertimbangkan memperpanjang tenor atau menurunkan plafon.`;
+        }
+      } else {
+        if (ratioBar) ratioBar.style.width = `0%`;
+        if (ratioChip) {
+          ratioChip.textContent = `Batas Aman ≤ 35%`;
+          ratioChip.setAttribute(`data-status`, `info`);
+        }
+        if (ratioExplain) {
+          ratioExplain.textContent = `Catat pemasukan di Pembukuan Digital untuk melihat rasio angsuran terhadap arus kas usaha Anda.`;
+        }
+      }
+
+      const breakdownEl = document.getElementById(`loan-breakdown-list`);
+      if (breakdownEl) {
+        breakdownEl.innerHTML = `
+          <li>Verifikasi Identitas &amp; Legalitas UMKM: <strong>${scoreData.verifScore} / 30 poin</strong></li>
+          <li>Keteraturan Pembukuan Digital: <strong>${scoreData.bookScore} / 25 poin</strong></li>
+          <li>Progres Sertifikasi / Standarisasi: <strong>${scoreData.certScore} / 25 poin</strong></li>
+          <li>Kemampuan Bayar Arus Kas Bersih: <strong>${scoreData.cashScore} / 20 poin</strong></li>
+        `;
+      }
+
+      if (shouldPersist) {
+        persistState();
+      }
+    }
+
+    /* ---------- UMKM CONNECT ---------- */
+    function addCommunityPost(e) {
+      e.preventDefault();
+      const topicEl = document.getElementById(`post-topic`);
+      const titleEl = document.getElementById(`post-title`);
+      const bodyEl = document.getElementById(`post-body`);
+      if (!topicEl || !titleEl || !bodyEl) return;
+
+      const title = titleEl.value.trim();
+      const body = bodyEl.value.trim();
+      if (title.length < 4 || body.length < 10) {
+        showInlineMessage(`msg-community`, `Judul minimal 4 karakter dan isi pesan minimal 10 karakter.`, `alert`);
+        return;
+      }
+
+      const authorName = appState.profile.name
+        ? (appState.profile.owner || `Pelaku UMKM`) + ` — ` + appState.profile.name
+        : `Pelaku UMKM (Anggota Sesi)`;
+
+      appState.posts.unshift({
+        id: `post_` + Date.now(),
+        author: authorName,
+        topic: topicEl.value,
+        title: title,
+        body: body,
+        time: `Baru saja`,
+        likes: 1,
+        likedByMe: true,
+        replies: []
+      });
+
+      titleEl.value = ``;
+      bodyEl.value = ``;
+      renderCommunity();
+      persistState();
+      showInlineMessage(`msg-community`, `Topik diskusi berhasil diterbitkan ke UMKM Connect.`, `ok`);
+    }
+
+    function togglePostLike(postId) {
+      const target = appState.posts.find(function (p) { return p.id === postId; });
+      if (!target) return;
+      target.likedByMe = !target.likedByMe;
+      target.likes += target.likedByMe ? 1 : -1;
+      renderCommunity();
+      persistState();
+    }
+
+    function submitReply(e, postId) {
+      e.preventDefault();
+      const input = document.getElementById(`reply-input-` + postId);
+      if (!input) return;
+      const text = input.value.trim();
+      if (text.length < 2) return;
+
+      const target = appState.posts.find(function (p) { return p.id === postId; });
+      if (!target) return;
+      const authorName = appState.profile.name ? appState.profile.name : `Pelaku UMKM`;
+      target.replies.push({ author: authorName, text: text });
+      input.value = ``;
+      renderCommunity();
+      persistState();
+    }
+
+    function renderCommunity() {
+      const feedEl = document.getElementById(`community-feed`);
+      const searchEl = document.getElementById(`comm-search`);
+      const filterEl = document.getElementById(`comm-topic-filter`);
+      const countChip = document.getElementById(`community-count-chip`);
+      if (!feedEl) return;
+
+      const q = searchEl ? searchEl.value.trim().toLowerCase() : ``;
+      const topic = filterEl ? filterEl.value : `semua`;
+
+      const filtered = appState.posts.filter(function (p) {
+        const matchTopic = topic === `semua` || p.topic === topic;
+        const matchQuery = !q || p.title.toLowerCase().includes(q) || p.body.toLowerCase().includes(q) || p.author.toLowerCase().includes(q);
+        return matchTopic && matchQuery;
+      });
+
+      if (countChip) countChip.textContent = filtered.length + ` Topik Ditampilkan`;
+
+      if (filtered.length === 0) {
+        feedEl.innerHTML = `<div class="empty-state">
+          <h3>Tidak ada diskusi yang cocok</h3>
+          <p>Ubah kata kunci pencarian atau buat topik kolaborasi baru melalui formulir di samping.</p>
+        </div>`;
+        return;
+      }
+
+      feedEl.innerHTML = filtered.map(function (p) {
+        const repliesHtml = (p.replies || []).map(function (r) {
+          return `<div style="font-size: 0.875rem;">
+            <strong>${escapeHtml(r.author)}:</strong> <span>${escapeHtml(r.text)}</span>
+          </div>`;
+        }).join(``);
+
+        return `<article class="post-card">
+          <div class="post-meta">
+            <strong>${escapeHtml(p.author)}</strong>
+            <span class="chip" data-status="info">${escapeHtml(p.topic)}</span>
+          </div>
+          <h3 style="font-size: var(--subhead-size); font-weight: 800;">${escapeHtml(p.title)}</h3>
+          <p style="margin: 0; color: var(--on-surface-variant);">${escapeHtml(p.body)}</p>
+          <div class="post-actions">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="togglePostLike('${p.id}')">
+              Dukung (${p.likes})
+            </button>
+            <span style="font-size: 0.8125rem; color: var(--on-surface-variant); align-self: center;">${escapeHtml(p.time)}</span>
+          </div>
+          ${repliesHtml ? `<div class="reply-box">${repliesHtml}</div>` : ``}
+          <form onsubmit="submitReply(event, '${p.id}')" style="display: flex; gap: var(--space-sm); margin-top: var(--space-xs);">
+            <label for="reply-input-${p.id}" style="position: absolute; width: 1px; height: 1px; overflow: hidden;">Balas diskusi ${escapeHtml(p.title)}</label>
+            <input type="text" id="reply-input-${p.id}" placeholder="Tulis balasan atau ajakan kolaborasi…" style="flex: 1; min-height: 36px; padding: var(--space-xs) var(--space-sm); border: 1px solid var(--outline); border-radius: var(--rounded);">
+            <button type="submit" class="btn btn-secondary btn-sm">Balas</button>
+          </form>
+        </article>`;
+      }).join(``);
+    }
+
+    /* ---------- TOP KPI SUMMARY ---------- */
+    function renderTopKPIs() {
+      const verifDone = VERIFICATION_STEPS.filter(function (s) { return Boolean(appState.verification[s.id]); }).length;
+      const kpiVerifCard = document.getElementById(`kpi-card-verif`);
+      const kpiVerifVal = document.getElementById(`kpi-verif-val`);
+      const kpiVerifNote = document.getElementById(`kpi-verif-note`);
+      if (kpiVerifVal) kpiVerifVal.textContent = verifDone + ` / 4 Langkah`;
+      if (kpiVerifCard) kpiVerifCard.setAttribute(`data-status`, verifDone === 4 ? `ok` : `neutral`);
+      if (kpiVerifNote) {
+        kpiVerifNote.textContent = verifDone === 4 && appState.profile.name ? `Terverifikasi · Kartu Usaha aktif` : `Lengkapi profil & verifikasi`;
+        kpiVerifNote.setAttribute(`data-tone`, verifDone === 4 ? `ok` : ``);
+      }
+
+      const kpiWalletCard = document.getElementById(`kpi-card-wallet`);
+      const kpiWalletVal = document.getElementById(`kpi-wallet-val`);
+      const kpiWalletNote = document.getElementById(`kpi-wallet-note`);
+      if (kpiWalletVal) kpiWalletVal.textContent = formatRupiah(appState.walletBalance);
+      if (kpiWalletCard) kpiWalletCard.setAttribute(`data-status`, appState.walletBalance > 0 ? `ok` : `neutral`);
+      if (kpiWalletNote) {
+        kpiWalletNote.textContent = appState.walletLedger.length > 0
+          ? appState.walletLedger.length + ` mutasi tercatat di dompet`
+          : `Siap menerima pembayaran QRIS`;
+      }
+
+      let totalIn = 0;
+      let totalOut = 0;
+      appState.transactions.forEach(function (t) {
+        if (t.type === `masuk`) totalIn += Number(t.amount) || 0;
+        else totalOut += Number(t.amount) || 0;
+      });
+      const net = totalIn - totalOut;
+      const kpiCashCard = document.getElementById(`kpi-card-cashflow`);
+      const kpiCashVal = document.getElementById(`kpi-cashflow-val`);
+      const kpiCashNote = document.getElementById(`kpi-cashflow-note`);
+      if (kpiCashVal) kpiCashVal.textContent = formatRupiah(net);
+      if (kpiCashCard) {
+        kpiCashCard.setAttribute(`data-status`, appState.transactions.length === 0 ? `neutral` : (net >= 0 ? `ok` : `alert`));
+      }
+      if (kpiCashNote) {
+        if (appState.transactions.length === 0) {
+          kpiCashNote.textContent = `Belum ada catatan pembukuan`;
+          kpiCashNote.setAttribute(`data-tone`, ``);
+        } else {
+          kpiCashNote.textContent = net >= 0 ? `Surplus dari ` + appState.transactions.length + ` transaksi` : `Defisit — periksa pengeluaran`;
+          kpiCashNote.setAttribute(`data-tone`, net >= 0 ? `ok` : `alert`);
+        }
+      }
+
+      const readyCerts = CERT_SCHEMES.filter(function (sc) {
+        return sc.items.every(function (it) { return Boolean(appState.certifications[it.id]); });
+      }).length;
+      const score = computeReadinessScore(0);
+      const kpiCertCard = document.getElementById(`kpi-card-cert`);
+      const kpiCertVal = document.getElementById(`kpi-cert-val`);
+      const kpiCertNote = document.getElementById(`kpi-cert-note`);
+      if (kpiCertVal) kpiCertVal.textContent = readyCerts + ` / 3 Siap`;
+      if (kpiCertCard) kpiCertCard.setAttribute(`data-status`, readyCerts > 0 ? `ok` : `neutral`);
+      if (kpiCertNote) kpiCertNote.textContent = `Skor kesiapan pembiayaan: ` + score.total + `%`;
+    }
+
+    /* ---------- PRESET SIMULASI & RESET & EXPORT ---------- */
+    function loadSimulationPreset() {
+      const today = new Date().toISOString().slice(0, 10);
+      appState.profile = {
+        name: `Kedai Kopi & Roastery Nusantara`,
+        owner: `Ratna Sari Dewi`,
+        sector: `Kuliner & Olahan Pangan`,
+        scale: `Usaha Mikro`,
+        nib: `1209202604418`,
+        city: `Bandung, Jawa Barat`,
+        kartuId: `KUS-2026-4812`
+      };
+      appState.verification = { v_ktp: true, v_nib: true, v_lokasi: true, v_rekening: true };
+      appState.capacity = { cap_keuangan: true, cap_digital: true, cap_mutu: false };
+      appState.transactions = [
+        { id: `sim_1`, type: `masuk`, category: `Penjualan Produk`, amount: 4850000, date: today, note: `[Simulasi] Penjualan biji kopi & minuman minggu 1` },
+        { id: `sim_2`, type: `masuk`, category: `Pembayaran QRIS`, amount: 3250000, date: today, note: `[Simulasi] Transaksi QRIS pelanggan kedai` },
+        { id: `sim_3`, type: `keluar`, category: `Bahan Baku`, amount: 2400000, date: today, note: `[Simulasi] Pembelian green bean Arabika 20 kg` },
+        { id: `sim_4`, type: `keluar`, category: `Operasional & Listrik`, amount: 950000, date: today, note: `[Simulasi] Listrik, air, dan internet gerai` },
+        { id: `sim_5`, type: `keluar`, category: `Kemasan & Promosi`, amount: 650000, date: today, note: `[Simulasi] Cetak kemasan standing pouch 500 pcs` }
+      ];
+      appState.walletBalance = 5650000;
+      appState.walletLedger = [
+        { id: `wl_sim_1`, action: `qris`, label: `Pembayaran QRIS`, amount: 3250000, isOut: false, desc: `[Simulasi] Rekap QRIS Harian`, date: today },
+        { id: `wl_sim_2`, action: `topup`, label: `Isi Saldo Modal`, amount: 3050000, isOut: false, desc: `[Simulasi] Saldo awal operasional usaha`, date: today },
+        { id: `wl_sim_3`, action: `pay`, label: `Bayar Pemasok`, amount: 650000, isOut: true, desc: `[Simulasi] Pelunasan cetak kemasan`, date: today }
+      ];
+      appState.certifications = {
+        h_bahan: true, h_proses: true, h_ikrar: true,
+        m_telusur: true, m_etiket: true, m_umk: false,
+        s_label: true, s_hygiene: true, s_uji: false
+      };
+      appState.financing = { amount: 40000000, tenor: 24, rate: `6` };
+
+      const sAmt = document.getElementById(`slider-loan-amount`);
+      const nAmt = document.getElementById(`input-loan-amount`);
+      const sTen = document.getElementById(`slider-loan-tenor`);
+      const nTen = document.getElementById(`input-loan-tenor`);
+      const sch = document.getElementById(`loan-scheme`);
+      if (sAmt) sAmt.value = 40000000;
+      if (nAmt) nAmt.value = 40000000;
+      if (sTen) sTen.value = 24;
+      if (nTen) nTen.value = 24;
+      if (sch) sch.value = `6`;
+
+      renderAll();
+      persistState();
+      showInlineMessage(`msg-profile`, `Data simulasi usaha (Kedai Kopi & Roastery Nusantara) berhasil dimuat ke seluruh modul.`, `ok`);
+    }
+
+    function resetWorkspaceState(btn) {
+      if (btn && btn.dataset.armed !== `true`) {
+        btn.dataset.armed = `true`;
+        btn.textContent = `Klik Lagi untuk Reset`;
+        setTimeout(function () {
+          if (btn.dataset.armed === `true`) {
+            btn.dataset.armed = `false`;
+            btn.textContent = `Reset Data`;
+          }
+        }, 4000);
+        return;
+      }
+      if (btn) {
+        btn.dataset.armed = `false`;
+        btn.textContent = `Reset Data`;
+      }
+      appState = createEmptyState();
+      renderAll();
+      persistState();
+      showInlineMessage(`msg-profile`, `Seluruh data sesi telah dikosongkan ke kondisi awal.`, `info`);
+    }
+
+    function exportBookkeepingCSV() {
+      const headers = [`Tanggal`, `Jenis`, `Kategori`, `Keterangan`, `Nominal_IDR`];
+      const rows = appState.transactions.map(function (t) {
+        return [
+          t.date,
+          t.type === `masuk` ? `Pemasukan` : `Pengeluaran`,
+          `"` + String(t.category || ``).replace(/"/g, `""`) + `"`,
+          `"` + String(t.note || ``).replace(/"/g, `""`) + `"`,
+          t.amount
+        ].join(`,`);
+      });
+      const csvContent = [headers.join(`,`)].concat(rows).join(`\n`);
+
+      if (window.notebookAppApi && typeof window.notebookAppApi.triggerFileDownload === `function`) {
+        window.notebookAppApi.triggerFileDownload({
+          content: csvContent,
+          contentType: `text/csv`,
+          encoding: `UTF-8`,
+          filename: `pembukuan-sapa-umkm.csv`
+        });
+        showInlineMessage(`msg-tx`, `Berkas CSV pembukuan berhasil diunduh.`, `ok`);
+      } else {
+        showInlineMessage(`msg-tx`, `Siap mengekspor ` + rows.length + ` baris transaksi.`, `info`);
+      }
+    }
+
+    function renderAll() {
+      renderVerificationAndKartu();
+      renderBookkeeping();
+      renderWallet();
+      renderCertifications();
+      updateFinancingCalc(false);
+      renderCommunity();
+      renderTopKPIs();
+    }
+
+    async function initApp() {
+      try {
+        if (window.notebookAppApi && typeof window.notebookAppApi.getAppState === `function`) {
+          const saved = await window.notebookAppApi.getAppState();
+          if (saved && typeof saved === `object`) {
+            appState = Object.assign(createEmptyState(), saved);
+          }
+        }
+      } catch (err) {
+        updateSaveIndicator(`Mode sesi baru`);
+      }
+
+      const sAmt = document.getElementById(`slider-loan-amount`);
+      const nAmt = document.getElementById(`input-loan-amount`);
+      const sTen = document.getElementById(`slider-loan-tenor`);
+      const nTen = document.getElementById(`input-loan-tenor`);
+      const sch = document.getElementById(`loan-scheme`);
+      if (appState.financing) {
+        if (sAmt) sAmt.value = Math.min(250000000, appState.financing.amount || 35000000);
+        if (nAmt) nAmt.value = appState.financing.amount || 35000000;
+        if (sTen) sTen.value = appState.financing.tenor || 24;
+        if (nTen) nTen.value = appState.financing.tenor || 24;
+        if (sch) sch.value = appState.financing.rate || `6`;
+      }
+
+      renderAll();
+
+      if (typeof lucide !== `undefined` && lucide.createIcons) {
+        lucide.createIcons();
+      }
+
+      if (window.notebookAppApi && typeof window.notebookAppApi.notifyAppReady === `function`) {
+        window.notebookAppApi.notifyAppReady();
+      }
+    }
+
+    document.addEventListener(`DOMContentLoaded`, initApp);
+  </script>
+</body>
+</html>
